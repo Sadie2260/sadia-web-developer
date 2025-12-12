@@ -414,8 +414,13 @@
         }
 
         @media (max-width: 768px) {
+           
             .greeting {
                 font-size: 2rem;
+                text-align: start!important;
+            }
+            .info-dots{
+                display: none !important;
             }
 
             .name {
@@ -434,6 +439,63 @@
             .description {
                 font-size: 1rem;
             }
+            /* ===========================
+   MOBILE FIX: Projects visible + no animations
+   =========================== */
+@media (max-width: 768px) {
+  .projects-wrapper {
+    height: auto !important;          /* remove 400vh scrolling trick */
+  }
+
+  .projects-container {
+    position: static !important;      /* stop pinned container issues */
+  }
+
+  .project-slide {
+    position: relative !important;    /* stop fixed slides */
+    top: auto !important;
+    left: auto !important;
+    height: auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    padding: 2.25rem 1.25rem !important;
+
+    opacity: 1 !important;            /* show everything */
+    pointer-events: auto !important;
+    transition: none !important;      /* disable fade transitions */
+  }
+
+  .project-left {
+    padding-right: 0 !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .project-right {
+    height: auto !important;
+  }
+
+  .project-media-wrapper {
+    width: 100% !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .project-image,
+  .project-title-line {
+    transform: none !important;       /* remove translated title lines */
+  }
+
+  /* Make all text visible even if GSAP tried to hide it */
+  .project-number,
+  .project-category,
+  .project-description,
+  .project-link,
+  .project-title {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
         }
 
         /* Fullscreen Menu */
@@ -2706,181 +2768,107 @@ serviceCards.forEach(wrapper => {
 
 
  const projectSlides = document.querySelectorAll('.project-slide');
-            const projectsWrapper = document.querySelector('.projects-wrapper');
-            
-            let currentIndex = 0;
+const projectsWrapper = document.querySelector('.projects-wrapper');
 
-            // Create main ScrollTrigger for the entire section
-            ScrollTrigger.create({
-                trigger: projectsWrapper,
-                start: 'top top',
-                end: 'bottom bottom',
-                pin: '.projects-container',
-                anticipatePin: 1,
-                onUpdate: (self) => {
-                    // Calculate which project should be active based on scroll progress
-                    const progress = self.progress;
-                    const newIndex = Math.floor(progress * projectSlides.length);
-                    const clampedIndex = Math.min(newIndex, projectSlides.length - 1);
-                    
-                    if (clampedIndex !== currentIndex) {
-                        switchProject(currentIndex, clampedIndex);
-                        currentIndex = clampedIndex;
-                    }
-                }
-            });
+const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
-            // Function to switch between projects
-            function switchProject(oldIndex, newIndex) {
-                const oldSlide = projectSlides[oldIndex];
-                const newSlide = projectSlides[newIndex];
-                
-                
-                
-                // Hide old project
-                const hideTimeline = gsap.timeline();
-                hideTimeline
-                    .to(oldSlide.querySelector('.project-number'), {
-                        opacity: 0,
-                        y: -20,
-                        duration: 0.4,
-                        ease: 'power2.in'
-                    }, 0)
-                    .to(oldSlide.querySelectorAll('.project-title-line'), {
-                        y: -100,
-                        stagger: 0.05,
-                        duration: 0.5,
-                        ease: 'power2.in'
-                    }, 0)
-                    .to(oldSlide.querySelector('.project-category'), {
-                        opacity: 0,
-                        y: -20,
-                        duration: 0.4,
-                        ease: 'power2.in'
-                    }, 0.1)
-                    .to(oldSlide.querySelector('.project-description'), {
-                        opacity: 0,
-                        y: -20,
-                        duration: 0.4,
-                        ease: 'power2.in'
-                    }, 0.1)
-                    .to(oldSlide.querySelector('.project-link'), {
-                        opacity: 0,
-                        x: -30,
-                        duration: 0.4,
-                        ease: 'power2.in'
-                    }, 0.1)
-                    .to(oldSlide.querySelector('.project-media-wrapper'), {
-                        opacity: 0,
-                        scale: 0.9,
-                        duration: 0.5,
-                        ease: 'power2.in'
-                    }, 0);
+/* ✅ MOBILE: no pin, no slide switching, just show all normally */
+if (isMobile) {
+  projectSlides.forEach((slide) => {
+    slide.classList.add('active');
 
-                // Show new project
-                const showTimeline = gsap.timeline({ delay: 0.3 });
-                const titleLines = newSlide.querySelectorAll('.project-title-line');
-                
-                // Reset positions before animating in
-                gsap.set(newSlide.querySelector('.project-number'), { opacity: 0, y: 20 });
-                gsap.set(titleLines, { y: 100 });
-                gsap.set(newSlide.querySelector('.project-title'), { opacity: 1 });
-                gsap.set(newSlide.querySelector('.project-category'), { opacity: 0, y: 20 });
-                gsap.set(newSlide.querySelector('.project-description'), { opacity: 0, y: 20 });
-                gsap.set(newSlide.querySelector('.project-link'), { opacity: 0, x: -30 });
-                gsap.set(newSlide.querySelector('.project-media-wrapper'), { opacity: 0, scale: 1.1 });
-                gsap.set(newSlide.querySelector('.project-image'), { scale: 1.2 });
-                
-                showTimeline
-                    .to(newSlide.querySelector('.project-number'), {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: 'power3.out'
-                    })
-                    .to(titleLines, {
-                        y: 0,
-                        stagger: 0.1,
-                        duration: 0.8,
-                        ease: 'power4.out'
-                    }, '-=0.3')
-                    .to(newSlide.querySelector('.project-category'), {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: 'power3.out'
-                    }, '-=0.5')
-                    .to(newSlide.querySelector('.project-description'), {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: 'power3.out'
-                    }, '-=0.4')
-                    .to(newSlide.querySelector('.project-link'), {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.6,
-                        ease: 'back.out(1.7)'
-                    }, '-=0.3')
-                    .to(newSlide.querySelector('.project-media-wrapper'), {
-                        opacity: 1,
-                        scale: 1,
-                        duration: 0.8,
-                        ease: 'power3.out'
-                    }, '-=0.6')
-                    .to(newSlide.querySelector('.project-image'), {
-                        scale: 1,
-                        duration: 1,
-                        ease: 'power2.out'
-                    }, '-=0.8');
-                
-                // Mark slide as active
-                projectSlides.forEach(s => s.classList.remove('active'));
-                newSlide.classList.add('active');
-            }
+    // Ensure everything is visible (in case any gsap.set ran earlier)
+    slide.querySelectorAll(
+      '.project-number, .project-title, .project-title-line, .project-category, .project-description, .project-link, .project-media-wrapper, .project-image'
+    ).forEach(el => {
+      el.style.opacity = "1";
+      el.style.transform = "none";
+    });
+  });
+} else {
+  let currentIndex = 0;
 
-            // Initial setup - show first project
-            projectSlides.forEach((slide, index) => {
-                if (index === 0) {
-                    slide.classList.add('active');
-                    gsap.set(slide.querySelector('.project-number'), { opacity: 1, y: 0 });
-                    gsap.set(slide.querySelectorAll('.project-title-line'), { y: 0 });
-                    gsap.set(slide.querySelector('.project-title'), { opacity: 1 });
-                    gsap.set(slide.querySelector('.project-category'), { opacity: 1, y: 0 });
-                    gsap.set(slide.querySelector('.project-description'), { opacity: 1, y: 0 });
-                    gsap.set(slide.querySelector('.project-link'), { opacity: 1, x: 0 });
-                    gsap.set(slide.querySelector('.project-media-wrapper'), { opacity: 1, scale: 1 });
-                    gsap.set(slide.querySelector('.project-image'), { scale: 1 });
-                } else {
-                    gsap.set(slide.querySelector('.project-number'), { opacity: 0 });
-                    gsap.set(slide.querySelectorAll('.project-title-line'), { y: 100 });
-                    gsap.set(slide.querySelector('.project-title'), { opacity: 0 });
-                    gsap.set(slide.querySelector('.project-category'), { opacity: 0 });
-                    gsap.set(slide.querySelector('.project-description'), { opacity: 0 });
-                    gsap.set(slide.querySelector('.project-link'), { opacity: 0 });
-                    gsap.set(slide.querySelector('.project-media-wrapper'), { opacity: 0 });
-                }
-            });
+  // Create main ScrollTrigger for the entire section
+  ScrollTrigger.create({
+    trigger: projectsWrapper,
+    start: 'top top',
+    end: 'bottom bottom',
+    pin: '.projects-container',
+    anticipatePin: 1,
+    onUpdate: (self) => {
+      const progress = self.progress;
+      const newIndex = Math.floor(progress * projectSlides.length);
+      const clampedIndex = Math.min(newIndex, projectSlides.length - 1);
 
+      if (clampedIndex !== currentIndex) {
+        switchProject(currentIndex, clampedIndex);
+        currentIndex = clampedIndex;
+      }
+    }
+  });
 
-            // Link hover animation
-            document.querySelectorAll('.project-link').forEach(link => {
-                link.addEventListener('mouseenter', () => {
-                    gsap.to(link, {
-                        scale: 1.05,
-                        duration: 0.3,
-                        ease: 'back.out(2)'
-                    });
-                });
+  function switchProject(oldIndex, newIndex) {
+    const oldSlide = projectSlides[oldIndex];
+    const newSlide = projectSlides[newIndex];
 
-                link.addEventListener('mouseleave', () => {
-                    gsap.to(link, {
-                        scale: 1,
-                        duration: 0.3,
-                        ease: 'power2.out'
-                    });
-                });
-            });
+    const hideTimeline = gsap.timeline();
+    hideTimeline
+      .to(oldSlide.querySelector('.project-number'), { opacity: 0, y: -20, duration: 0.4, ease: 'power2.in' }, 0)
+      .to(oldSlide.querySelectorAll('.project-title-line'), { y: -100, stagger: 0.05, duration: 0.5, ease: 'power2.in' }, 0)
+      .to(oldSlide.querySelector('.project-category'), { opacity: 0, y: -20, duration: 0.4, ease: 'power2.in' }, 0.1)
+      .to(oldSlide.querySelector('.project-description'), { opacity: 0, y: -20, duration: 0.4, ease: 'power2.in' }, 0.1)
+      .to(oldSlide.querySelector('.project-link'), { opacity: 0, x: -30, duration: 0.4, ease: 'power2.in' }, 0.1)
+      .to(oldSlide.querySelector('.project-media-wrapper'), { opacity: 0, scale: 0.9, duration: 0.5, ease: 'power2.in' }, 0);
+
+    const showTimeline = gsap.timeline({ delay: 0.3 });
+    const titleLines = newSlide.querySelectorAll('.project-title-line');
+
+    gsap.set(newSlide.querySelector('.project-number'), { opacity: 0, y: 20 });
+    gsap.set(titleLines, { y: 100 });
+    gsap.set(newSlide.querySelector('.project-title'), { opacity: 1 });
+    gsap.set(newSlide.querySelector('.project-category'), { opacity: 0, y: 20 });
+    gsap.set(newSlide.querySelector('.project-description'), { opacity: 0, y: 20 });
+    gsap.set(newSlide.querySelector('.project-link'), { opacity: 0, x: -30 });
+    gsap.set(newSlide.querySelector('.project-media-wrapper'), { opacity: 0, scale: 1.1 });
+    gsap.set(newSlide.querySelector('.project-image'), { scale: 1.2 });
+
+    showTimeline
+      .to(newSlide.querySelector('.project-number'), { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' })
+      .to(titleLines, { y: 0, stagger: 0.1, duration: 0.8, ease: 'power4.out' }, '-=0.3')
+      .to(newSlide.querySelector('.project-category'), { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.5')
+      .to(newSlide.querySelector('.project-description'), { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4')
+      .to(newSlide.querySelector('.project-link'), { opacity: 1, x: 0, duration: 0.6, ease: 'back.out(1.7)' }, '-=0.3')
+      .to(newSlide.querySelector('.project-media-wrapper'), { opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out' }, '-=0.6')
+      .to(newSlide.querySelector('.project-image'), { scale: 1, duration: 1, ease: 'power2.out' }, '-=0.8');
+
+    projectSlides.forEach(s => s.classList.remove('active'));
+    newSlide.classList.add('active');
+  }
+
+  // Initial setup - show first project
+  projectSlides.forEach((slide, index) => {
+    if (index === 0) {
+      slide.classList.add('active');
+      gsap.set(slide.querySelector('.project-number'), { opacity: 1, y: 0 });
+      gsap.set(slide.querySelectorAll('.project-title-line'), { y: 0 });
+      gsap.set(slide.querySelector('.project-title'), { opacity: 1 });
+      gsap.set(slide.querySelector('.project-category'), { opacity: 1, y: 0 });
+      gsap.set(slide.querySelector('.project-description'), { opacity: 1, y: 0 });
+      gsap.set(slide.querySelector('.project-link'), { opacity: 1, x: 0 });
+      gsap.set(slide.querySelector('.project-media-wrapper'), { opacity: 1, scale: 1 });
+      gsap.set(slide.querySelector('.project-image'), { scale: 1 });
+    } else {
+      gsap.set(slide.querySelector('.project-number'), { opacity: 0 });
+      gsap.set(slide.querySelectorAll('.project-title-line'), { y: 100 });
+      gsap.set(slide.querySelector('.project-title'), { opacity: 0 });
+      gsap.set(slide.querySelector('.project-category'), { opacity: 0 });
+      gsap.set(slide.querySelector('.project-description'), { opacity: 0 });
+      gsap.set(slide.querySelector('.project-link'), { opacity: 0 });
+      gsap.set(slide.querySelector('.project-media-wrapper'), { opacity: 0 });
+    }
+  });
+}
+
         };
         // HAMBURGER MENU SLIDE-IN
 
@@ -2889,7 +2877,6 @@ serviceCards.forEach(wrapper => {
 </body>
 
 </html>
-
 
 
 
